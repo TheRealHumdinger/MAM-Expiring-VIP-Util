@@ -4,12 +4,12 @@
 // @author       Humdinger
 // @description  Remove all non-ExpiringVIP torrents from the browse list and make dates visible
 // @match        https://www.myanonamouse.net/tor/browse.php*
-// @version      0.0.1
+// @version      0.0.2
 // @icon https://cdn.myanonamouse.net/imagebucket/204586/MouseyIcon.png
 // @homepage     https://www.myanonamouse.net
 // @license      MIT
-// @downloadURL https://github.com/TheRealHumdinger/MAM Expiring VIP Util/raw/main/MAMExpiringVIPUtil.user.js
-// @updateURL https://github.com/TheRealHumdinger/MAM Expiring VIP Util/raw/main/MAMExpiringVIPUtil.user.js
+// @downloadURL https://github.com/TheRealHumdinger/MAM-Expiring-VIP-Util/raw/main/MAMExpiringVIPUtil.user.js
+// @updateURL https://github.com/TheRealHumdinger/MAM-Expiring-VIP-Util/raw/main/MAMExpiringVIPUtil.user.js
 // ==/UserScript==
 (function () {
   "use strict";
