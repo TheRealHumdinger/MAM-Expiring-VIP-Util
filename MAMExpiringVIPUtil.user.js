@@ -4,7 +4,7 @@
 // @author       Humdinger
 // @description  Remove all non-ExpiringVIP torrents from the browse list and make dates visible
 // @match        https://www.myanonamouse.net/tor/browse.php*
-// @version      0.0.3
+// @version      0.0.4
 // @icon https://cdn.myanonamouse.net/imagebucket/204586/MouseyIcon.png
 // @homepage     https://www.myanonamouse.net
 // @license      MIT
@@ -26,6 +26,9 @@
 	onlyExpVIPButton.onclick = function () {
     // Get the tdr rows
 		var rows = document.querySelector("table.newTorTable").querySelectorAll('[id^="tdr"]');
+    // Array to store rows with their expiration data for sorting
+		var rowsToSort = [];
+
     // Move through them from bottom to top
 		for (let i = rows.length - 1; i >= 0; i--) {
       // Get the icon TD element
@@ -51,16 +54,61 @@
         // Go through the different possible iterations of matching the date fields
         // If it falls within the filter call the addLabel function
         // If not, remove it
+        var shouldKeep = false;
         if (expDate != "" && compDate != "" && endDate != "" && expDate >= compDate && expDate <= endDate) {
 					addLabel(iconTd, expDate);
+					shouldKeep = true;
 				} else if (expDate != "" && compDate != "" && endDate == "" && expDate == compDate) {
 					addLabel(iconTd, expDate);
+					shouldKeep = true;
 				} else if (expDate != "" && compDate == "" && endDate != "" && expDate <= endDate) {
 					addLabel(iconTd, expDate);
+					shouldKeep = true;
 				} else if (expDate != "" && compDate == "" && endDate == "") {
 					addLabel(iconTd, expDate);
+					shouldKeep = true;
 				} else {
 					rows[i].remove();
+				}
+
+				// If this row should be kept, add it to the array for sorting
+				if (shouldKeep) {
+					var expUTCDate = createUTCTimestampFromYYYYMMDD(expDate);
+					var curUTCDate = new Date();
+					var daysUntilExpiry = (expUTCDate - curUTCDate) / 60 / 60 / 24 / 1000;
+
+					// Get the row ID and find matching ddr div if it exists
+					var rowId = rows[i].id;
+					var ddrId = rowId.replace('tdr', 'ddr');
+					var ddrDiv = document.getElementById(ddrId);
+
+					rowsToSort.push({
+						row: rows[i],
+						ddrDiv: ddrDiv,
+						days: daysUntilExpiry
+					});
+				}
+			}
+		}
+
+		// Sort rows by days until expiration (soonest first)
+		rowsToSort.sort(function(a, b) {
+			return a.days - b.days;
+		});
+
+		// Get the table body and re-insert tdr rows in sorted order
+		var tableBody = document.querySelector("table.newTorTable").querySelector("tbody");
+		for (let i = 0; i < rowsToSort.length; i++) {
+			tableBody.appendChild(rowsToSort[i].row);
+		}
+
+		// Reorder ddr divs to match the sorted tdr rows
+		// Find the parent container of the first ddr div to reorder them there
+		if (rowsToSort.length > 0 && rowsToSort[0].ddrDiv) {
+			var ddrParent = rowsToSort[0].ddrDiv.parentNode;
+			for (let i = 0; i < rowsToSort.length; i++) {
+				if (rowsToSort[i].ddrDiv) {
+					ddrParent.appendChild(rowsToSort[i].ddrDiv);
 				}
 			}
 		}
